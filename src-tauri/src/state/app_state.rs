@@ -1,8 +1,22 @@
+use crate::utils::vencord_loader::VencordLoader;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Mutex, RwLock};
 use tauri::{AppHandle, Manager};
+
+pub const DISCORD_URLS: &[(&str, &str)] = &[
+    ("stable", "https://discord.com/app"),
+    ("canary", "https://canary.discord.com/app"),
+    ("ptb", "https://ptb.discord.com/app"),
+];
+
+pub fn get_discord_url(branch: &str) -> &str {
+    DISCORD_URLS
+        .iter()
+        .find(|(k, _)| *k == branch)
+        .map(|(_, v)| *v)
+        .unwrap_or(DISCORD_URLS[0].1)
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -87,6 +101,7 @@ pub struct AppState {
     pub state: RwLock<State>,
     pub settings_path: Mutex<PathBuf>,
     pub state_path: Mutex<PathBuf>,
+    pub vencord_loader: Mutex<VencordLoader>,
 }
 
 impl AppState {
@@ -100,12 +115,15 @@ impl AppState {
         let settings = Self::load_json(&settings_path).unwrap_or_default();
         let state = Self::load_json(&state_path).unwrap_or_default();
 
+        let vencord_loader = VencordLoader::new(data_dir.clone());
+
         Ok(Self {
             app_handle,
             settings: RwLock::new(settings),
             state: RwLock::new(state),
             settings_path: Mutex::new(settings_path),
             state_path: Mutex::new(state_path),
+            vencord_loader: Mutex::new(vencord_loader),
         })
     }
 

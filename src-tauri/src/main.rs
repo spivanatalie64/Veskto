@@ -6,8 +6,21 @@ mod utils;
 
 use state::AppState;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use utils::cli::{parse_args, print_help, print_version};
 
 fn main() {
+    let cli = parse_args();
+
+    if cli.show_help {
+        print_help();
+        return;
+    }
+
+    if cli.show_version {
+        print_version();
+        return;
+    }
+
     simple_logging::log_to_stderr(log::LevelFilter::Info);
 
     tauri::Builder::default()
@@ -20,21 +33,22 @@ fn main() {
         .setup(|app| {
             let app_handle = app.handle().clone();
 
+            utils::protocol::register_protocol(&app_handle)
+                .expect("Failed to register vesktop:// protocol");
+
             app.manage(AppState::new(app_handle)?);
 
             let state = app.state::<AppState>();
-            let settings = state.settings.read().unwrap();
-            let start_minimized = false;
+            let app_state = state.state.read().unwrap();
 
             let mut builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("Veskto")
                 .inner_size(1280.0, 720.0)
                 .resizable(true)
-                .visible(!start_minimized)
+                .visible(!cli.start_minimized)
                 .decorations(false)
                 .transparent(true);
 
-            let app_state = state.state.read().unwrap();
             if let Some(bounds) = &app_state.window_bounds {
                 builder = builder
                     .position(bounds.x as f64, bounds.y as f64)
@@ -45,6 +59,17 @@ fn main() {
 
             if app_state.maximized {
                 let _ = window.maximize();
+            }
+
+            if let Some(url) = &cli.discord_url {
+                let url = url.clone();
+                let app_handle = app_handle.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+                    if let Some(win) = app_handle.get_webview_window("main") {
+                        let _ = win.eval(&format!("window.location.href = '{}';", url));
+                    }
+                });
             }
 
             let app_handle_clone = app_handle.clone();

@@ -1,0 +1,27 @@
+name: Sync unstable from upstream
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - unstable
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: unstable
+          fetch-depth: 0
+
+      - name: Add upstream remote and sync
+        run: |
+          git remote add upstream https://github.com/Vencord/Vesktop.git
+          git fetch upstream
+          git push --force origin upstream/main:refs/heads/unstable

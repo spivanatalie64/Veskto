@@ -47,6 +47,20 @@ export interface VesktopNativeClipboard {
     copyImage(dataUrl: string): Promise<void>;
 }
 
+export interface VesktopNativeTray {
+    setIcon(path: string): Promise<void>;
+    setTooltip(tooltip: string): Promise<void>;
+}
+
+export interface VesktopNativeVencord {
+    getScript(): Promise<string>;
+}
+
+export interface VesktopNativeSteamDeck {
+    isGameMode(): Promise<boolean>;
+    applyFixes(): Promise<void>;
+}
+
 export interface VesktopNative {
     app: VesktopNativeApp;
     settings: VesktopNativeSettings;
@@ -54,6 +68,9 @@ export interface VesktopNative {
     autostart: VesktopNativeAutostart;
     commands: VesktopNativeCommands;
     clipboard: VesktopNativeClipboard;
+    tray: VesktopNativeTray;
+    vencord: VesktopNativeVencord;
+    steamDeck: VesktopNativeSteamDeck;
 }
 
 const commandHandlers = new Map<
@@ -118,10 +135,14 @@ export const VesktopNative: VesktopNative = {
 
     autostart: {
         async isEnabled() {
-            return false;
+            return invoke("is_autostart_enabled");
         },
-        async enable() {},
-        async disable() {},
+        async enable() {
+            return invoke("enable_autostart");
+        },
+        async disable() {
+            return invoke("disable_autostart");
+        },
     },
 
     commands: {
@@ -138,6 +159,30 @@ export const VesktopNative: VesktopNative = {
     clipboard: {
         async copyImage(_dataUrl: string) {
             // TODO: implement via clipboard manager plugin
+        },
+    },
+
+    tray: {
+        async setIcon(path: string) {
+            return invoke("set_tray_icon", { iconPath: path });
+        },
+        async setTooltip(tooltip: string) {
+            return invoke("set_tray_tooltip", { tooltip });
+        },
+    },
+
+    vencord: {
+        async getScript() {
+            return invoke("get_vencord_script");
+        },
+    },
+
+    steamDeck: {
+        async isGameMode() {
+            return invoke("is_steam_deck_game_mode");
+        },
+        async applyFixes() {
+            return invoke("apply_steam_deck_fixes");
         },
     },
 };

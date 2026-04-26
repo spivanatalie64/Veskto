@@ -37,13 +37,19 @@ fn main() {
                 .expect("Failed to register vesktop:// protocol");
 
             let state = AppState::new(app_handle.clone())?;
+
+            let is_steam_deck = commands::autostart::is_steam_deck_game_mode();
+            if is_steam_deck {
+                commands::autostart::apply_steam_deck_fixes();
+            }
+
             let data_dir = {
                 let loader = state.vencord_loader.lock().unwrap();
                 loader.vencord_dir().clone()
             };
 
             tokio::spawn(async move {
-                let loader = VencordLoader::new(data_dir);
+                let loader = utils::vencord_loader::VencordLoader::new(data_dir);
                 if let Err(e) = loader.ensure_vencord_files().await {
                     log::error!("Failed to ensure Vencord files: {}", e);
                 }
@@ -102,6 +108,10 @@ fn main() {
                 }
             });
 
+            if settings.tray {
+                commands::tray::create_tray(&app_handle).expect("Failed to create tray");
+            }
+
             #[cfg(debug_assertions)]
             {
                 let window = app.get_webview_window("main").unwrap();
@@ -126,6 +136,13 @@ fn main() {
             commands::window::show_window,
             commands::window::flash_window,
             commands::vencord::get_vencord_script,
+            commands::autostart::is_autostart_enabled,
+            commands::autostart::enable_autostart,
+            commands::autostart::disable_autostart,
+            commands::autostart::is_steam_deck_game_mode,
+            commands::autostart::apply_steam_deck_fixes,
+            commands::tray::set_tray_icon,
+            commands::tray::set_tray_tooltip,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Veskto");

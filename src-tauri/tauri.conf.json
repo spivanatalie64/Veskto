@@ -1,0 +1,48 @@
+{
+    "$schema": "https://raw.githubusercontent.com/nicklasxyz/tauri/refs/heads/dev/packages/tooling/cli/schema.json",
+    "productName": "Veskto",
+    "version": "1.6.5",
+    "identifier": "org.acreetionos.veskto",
+    "build": {
+        "frontendDist": "../dist",
+        "devUrl": "http://localhost:1420",
+        "beforeDevCommand": "pnpm dev",
+        "beforeBuildCommand": "pnpm build"
+    },
+    "app": {
+        "withGlobalTauri": true,
+        "windows": [
+            {
+                "title": "Veskto",
+                "width": 1280,
+                "height": 720,
+                "resizable": true,
+                "fullscreen": false
+            }
+        ],
+        "security": {
+            "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://discord.com https://*.discord.com; connect-src 'self' https://discord.com https://*.discord.com wss://*.discord.com; img-src 'self' data: blob: https://discord.com https://*.discord.com vesktop:; media-src 'self' data: blob: https://discord.com https://*.discord.com; font-src 'self' https://discord.com https://*.discord.com;"
+        }
+    },
+    "bundle": {
+        "active": true,
+        "targets": "all",
+        "icon": [
+            "icons/32x32.png",
+            "icons/128x128.png",
+            "icons/128x128@2x.png",
+            "icons/icon.icns",
+            "icons/icon.ico"
+        ],
+        "linux": {
+            "deb": {
+                "depends": ["libwebkit2gtk-4.1-0"],
+                "section": "network",
+                "priority": "optional"
+            },
+            "appimage": {
+                "bundleMediaFramework": true
+            }
+        }
+    }
+}

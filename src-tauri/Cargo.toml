@@ -1,0 +1,40 @@
+[package]
+name = "veskto"
+version = "1.6.5"
+description = "The lean, Gecko-powered Discord client built with Tauri for users who value their RAM as much as their privacy."
+authors = ["natalie"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/spivanatalie64/Veskto"
+edition = "2021"
+rust-version = "1.78"
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "protocol-asset"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-clipboard-manager = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+dirs = "5"
+url = "2"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+futures = "0.3"
+log = "0.4"
+simple-logging = "2"
+once_cell = "1.19"
+thiserror = "1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = "4"
+
+[build-dependencies]
+tauri-build = "2"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+devtools = ["tauri/devtools"]

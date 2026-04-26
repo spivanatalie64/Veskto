@@ -1,12 +1,12 @@
 {
-    "name": "vesktop",
+    "name": "veskto",
     "version": "1.6.5",
     "private": true,
-    "description": "Vesktop is a custom Discord desktop app",
+    "description": "The lean, Gecko-powered Discord client built with Tauri for users who value their RAM as much as their privacy.",
     "keywords": [],
-    "homepage": "https://vencord.dev/",
+    "homepage": "https://veskto.acreetionos.org/",
     "license": "GPL-3.0-or-later",
-    "author": "Vendicated <vendicated@riseup.net>",
+    "author": "natalie",
     "main": "dist/js/main.js",
     "scripts": {
         "build": "tsx scripts/build/build.mts",
@@ -24,7 +24,11 @@
         "watch": "pnpm build --watch",
         "generateMeta": "tsx scripts/utils/generateMeta.mts",
         "updateArrpcDB": "node ./node_modules/arrpc/update_db.js",
-        "postinstall": "pnpm updateArrpcDB"
+        "postinstall": "pnpm updateArrpcDB",
+        "tauri": "tauri",
+        "tauri:dev": "tauri dev",
+        "tauri:build": "tauri build",
+        "tauri:build:debug": "tauri build --debug"
     },
     "dependencies": {
         "arrpc": "github:OpenAsar/arrpc#2234e9c9111f4c42ebcc3aa6a2215bfd979eef77",

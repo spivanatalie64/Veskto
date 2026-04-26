@@ -4,3 +4,29 @@ node_modules
 .DS_Store
 .idea/
 .pnpm-store/
+
+# Tauri
+src-tauri/target
+src-tauri/gen
+src-tauri/icons/*.png
+src-tauri/icons/*.icns
+src-tauri/icons/*.ico
+!src-tauri/icons/32x32.png
+!src-tauri/icons/128x128.png
+!src-tauri/icons/128x128@2x.png
+!src-tauri/icons/icon.icns
+!src-tauri/icons/icon.ico
+
+# Rust
+*.rs.bk
+*.rlib
+*.profraw
+*.profdata
+target/
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

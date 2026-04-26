@@ -22,6 +22,45 @@ fn main() {
 
             app.manage(AppState::new(app_handle)?);
 
+            let state = app.state::<AppState>();
+            let settings = state.settings.read().unwrap();
+            let start_minimized = false;
+
+            let mut builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+                .title("Veskto")
+                .inner_size(1280.0, 720.0)
+                .resizable(true)
+                .visible(!start_minimized)
+                .decorations(false)
+                .transparent(true);
+
+            let app_state = state.state.read().unwrap();
+            if let Some(bounds) = &app_state.window_bounds {
+                builder = builder
+                    .position(bounds.x as f64, bounds.y as f64)
+                    .inner_size(bounds.width as f64, bounds.height as f64);
+            }
+
+            let window = builder.build()?;
+
+            if app_state.maximized {
+                let _ = window.maximize();
+            }
+
+            let app_handle_clone = app_handle.clone();
+            window.on_window_event(move |event| {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    let state = app_handle_clone.state::<AppState>();
+                    let settings = state.settings.read().unwrap();
+                    if settings.minimize_to_tray {
+                        api.prevent_close();
+                        if let Some(win) = app_handle_clone.get_webview_window("main") {
+                            let _ = win.hide();
+                        }
+                    }
+                }
+            });
+
             #[cfg(debug_assertions)]
             {
                 let window = app.get_webview_window("main").unwrap();
@@ -38,6 +77,13 @@ fn main() {
             commands::app::relaunch,
             commands::app::get_version,
             commands::app::quit,
+            commands::window::close_splash,
+            commands::window::save_window_state,
+            commands::window::minimize_window,
+            commands::window::maximize_window,
+            commands::window::close_window,
+            commands::window::show_window,
+            commands::window::flash_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Veskto");

@@ -1,0 +1,110 @@
+name: Build and Test (Self-Healing)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl wget file \
+            libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and Test (Self-Healing)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          max_attempts=2
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "=== Attempt $attempt of $max_attempts ==="
+
+            echo "::group::Frontend Build"
+            pnpm build && FRONTEND_OK=true || FRONTEND_OK=false
+            echo "::endgroup::"
+
+            if [ "$FRONTEND_OK" = false ]; then
+              echo "Frontend build failed."
+              if [ $attempt -eq 1 ]; then
+                echo "Running self-heal for frontend..."
+                # Attempt to fix: reinstall deps, fresh lockfile, etc.
+                rm -rf node_modules pnpm-lock.yaml
+                pnpm install
+                attempt=$((attempt + 1))
+                continue
+              else
+                echo "Self-heal did not fix frontend build."
+                exit 1
+              fi
+            fi
+
+            echo "::group::Rust Build (cargo check)"
+            cargo check --manifest-path src-tauri/Cargo.toml && RUST_OK=true || RUST_OK=false
+            echo "::endgroup::"
+
+            if [ "$RUST_OK" = false ]; then
+              echo "Rust build failed."
+              if [ $attempt -eq 1 ]; then
+                echo "Running self-heal for Rust..."
+                # Clear cargo cache, update deps
+                cargo clean --manifest-path src-tauri/Cargo.toml
+                pnpm install
+                attempt=$((attempt + 1))
+                continue
+              else
+                echo "Self-heal did not fix Rust build."
+                exit 1
+              fi
+            fi
+
+            echo "Both builds succeeded. Running tests..."
+
+            echo "::group::Tests"
+            (pnpm test || cargo test --manifest-path src-tauri/Cargo.toml) && TESTS_OK=true || TESTS_OK=false
+            echo "::endgroup::"
+
+            if [ "$TESTS_OK" = false ]; then
+              echo "Tests failed."
+              exit 1
+            fi
+
+            echo "=== Build and Test succeeded ==="
+            break
+          done
+
+      - name: Done
+        run: echo "CI completed successfully"

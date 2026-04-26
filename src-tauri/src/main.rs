@@ -143,6 +143,13 @@ fn main() {
             commands::autostart::apply_steam_deck_fixes,
             commands::tray::set_tray_icon,
             commands::tray::set_tray_tooltip,
+            commands::dbus::get_accent_color,
+            commands::dbus::update_unity_launcher_count,
+            commands::dbus::request_background,
+            commands::venmic::list_audio_nodes,
+            commands::venmic::start_virtual_mic,
+            commands::venmic::stop_virtual_mic,
+            commands::venmic::start_system_audio,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Veskto");

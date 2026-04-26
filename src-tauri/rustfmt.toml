@@ -1,0 +1,9 @@
+edition = "2021"
+
+[format]
+edition = "2021"
+max_width = 100
+tab_spaces = 4
+
+[clippy]
+allow = ["too_many_arguments", "type_complexity"]

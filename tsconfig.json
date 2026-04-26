@@ -9,15 +9,12 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         "jsx": "preserve",
-
-        // @vencord/types has some errors for now
         "skipLibCheck": true,
-
         "paths": {
-            "*": ["./src/*"],
+            "@/*": ["./src/frontend/*"],
+            "*": ["./src/*"]
         },
-
-        "types": ["node", "@vencord/types"]
+        "types": ["node", "@vencord/types", "@tauri-apps/api"]
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*", "vite.config.ts"]
 }

@@ -57,3 +57,14 @@ If you want to build it from source:
     - Fedora: `dnf install @c-development @development-tools python3 curl pkgconf-pkg-config glib2-devel`
 2. Run `pnpm buildLibVesktop`
 3. From now on, building Vesktop will use your own build
+---
+
+## 🤖 Pullfrog AI Review
+
+This repository uses **Pullfrog AI** to automatically review pull requests.
+
+Pullfrog is an AI-powered code review agent that analyzes every PR for code quality,
+security issues, performance problems, and best practice violations. Reviews appear
+as inline PR comments and checks. Trigger manually by commenting `@pullfrog` on any PR.
+
+Powered by OpenRouter.
